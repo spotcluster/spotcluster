@@ -1,63 +1,34 @@
-SpotCluster is a new project that helps developers reduce their cloud compute costs through efficient use of spot instances.
+## Overview
 
-## Concepts
+SpotCluster enables developers to run highly availability services on low cost "spot" instances. Key features include:
 
-### Spot Instances
-Spot instances are low cost virtual machines that are up to 90% cheaper than regular on-demand instances. Spot instances are available on AWS, Azure, Google Cloud, and Alibaba, and are identical to on-demand instances, except for one important catch: they can be interrupted (i.e. force terminated) at any time by the cloud provider. This makes it difficult to deliver highly available services, especially stateful services, using spot instances.
+1. **80% savings**: SpotCluster makes efficient use of spot instances to drive costs down. On average, users enjoy savings of 81.3% compared with standard (on demand) VM groups.
 
+2. **99.999% availability**: On average, stateless SpotCluster workloads running on at least 3 nodes enjoy 99.999+% uptime.
 
-### SpotCluster
-SpotCluster makes it easy to deploy critical services (including stateful services) on spot instances. It uses several strategies to ensure high availability:
+1. **Instance Diversification**: SpotCluster achieves high availability by carefully balancing workloads across a variety of instance types and availability zones. This reduces the probability that multiple instances in a cluster will be terminated at the same time.
 
-1. It deploys workloads across a variety of instance types and availability zones. This reduces the probability that multiple instances in a cluster will be terminated at the same time.
+2. **Proactive Replacements**: SpotCluster uses historical and real-time data to select instances with a high life expectancy, and to predict when instances are likely to be terminated. If SpotCluster anticipates a termination, it begins the replacement process early, providing ample time for terminating instances to drain, and replacement instances to become healthy. This helps to ensure high availability.
 
-2. It uses historical and real-time data to select instances with a high life expectancy, and to predict when instances are likely to be terminated. If it anticipates a termination, it begins the replacement process early, providing ample time for a smooth transition.
+3. **On-Demand Fallback** SpotCluster falls back to reserved / on-demand instances if suitable spot instances are unavailable.
 
-3. It falls back to reserved / on-demand instances if suitable spot instances are unavailable.
+4. **Stateful Migrations**: When SpotCluster replaces a stateful instance, it migrates network identity (e.g. IP address) and network volumes from the terminating instance to its replacement. As a result, the instance appears to have simply rebooted, even though it has actually migrated to new hardware. This means that SpotCluster works seamlessly with most stateful workloads (e.g. MySQL, MongoDB, Redis, etc).
 
-4. It migrates instance state (e.g. IP address and network volumes) across replacements if required.
+5. **Price Watch**: SpotCluster monitors spot pricing, and proactively replaces expensive instances with cheaper alternatives where possible.
 
-5. It monitors instance pricing, and proactively replaces instances with cheaper alternatives where possible.
+6. **Workload Awareness**: Instances can help SpotCluster make sound decisions by providing information about themselves via the SpotCluster API. For example, if an instance indicates that it performs a critical or ‘master’ type role, it is less likely to be proactively replaced. Likewise, if an instance is subject to a proactive replacement, it can use the SpotCluster API request extra time.
 
-## Features
+7. **Plugins**: SpotCluster Plugins enable popular stacks to use the SpotCluster API well. For example, the SpotCluster plugin for Kubernetes helps Kubernetes allocate containers based on instance type (spot or persistent), and allows Kubernetes to fully drain an instance that will soon be replaced.
 
-### Proactive Replacements
-SpotCluster uses real-time and historical data to predict when spot instances are likely to be force terminated, then proactively migrates work to alternate instances up to 90 minutes in advance. This gives instances extra time to drain properly, improving reliability.
+8. **Compatibility**: SpotCluster is compatible with existing structures like AWS AutoScaling Groups, and can be managed using Terraform or CloudFormation.
 
-### Price Watch
-SpotCluster continually monitors and ranks spot instance types based on price and life expectancy. If SpotCluster detects an opportunity to save you money without unduly increasing risk, it gradually rebalances your workload to cheaper instances.
+9. **Configurability**: SpotCluster can be configured to optimize for cost or availability (via the *economy ratio*), and can be configured to maintain a proportion of instances on persistent (i.e. On Demand or Reserved) hardware.
 
-### Stateful Support
-If SpotCluster needs to replace a stateful instance (e.g. a database shard), it ensures that the replacement instance retains the network identity (IP address) and network volumes (e.g. EBS) of the original instance. As a result, the instance appears to have simply rebooted, even though it has actually migrated to new hardware. This means that SpotCluster works out-of-the-box with most stateful workloads.
+10. **Multi Cloud**: SpotCluster works with AWS, Azure, and Google Cloud, with support for Alibaba coming soon.
 
-### Workload Awareness and Plugins
-Instances can help SpotCluster make sound decisions by providing information about themselves via the Awareness API. For example, if an instance indicates that it performs a critical or ‘master’ type role, it is less likely to be proactively replaced. Likewise, if an instance is subject to a proactive replacement, it can use the Awareness API request extra time.
+For more information and FAQs, see the project wiki.
 
-Plugins enables popular software to use the Awareness API well. For example, the SpotCluster plugin for Kubernetes helps Kubernetes allocate containers based on instance type (spot or persistent), and allows Kubernetes to fully drain an instance that will soon be replaced.
+## Status
+SpotCluster is currently used internally at Oikos, and a few related startups. We are preparing it for open-source release, and anticipate the code will be available here in Q3 2018.
 
-## Cluster Management
-Clusters can be managed in several ways, including:
-* SpotCluster API
-* SpotCluster Admin Console
-* Terraform
-* SpotCluster
-
-For more information, see the Documentation (coming soon).
-
-## Strategy Options
-SpotCluster supports a number of strategy options that can be used to optimize your cluster. This includes:
-
-* An **economy ratio**, which determines how frequently SpotCluster triggers lazy replacements in order to save money. A high economy ratio will result in greater cost savings, but more replacements. A low ratio will result in fewer replacements, but fewer cost savings.
-
-* An **availability ratio**, which determines the maximum number of stateful instances that can be unavailable at any given time.
-
-* A **minimum persistent ratio**, which determines the proportion of instances that should run on persistent (i.e. On-Demand / Reserved) instances.
-
-## Integrations
-### AWS Autoscaling Groups
-SpotCluster can be  configured to work with existing Autoscaling Groups. This allows SpotCluster to quickly deliver cost savings for systems built on AutoScaling Groups (e.g. Elastic Beanstalk, AWS Container Service).
-
-SpotCluster for ASG works by replacing built-in Lifecycle Hooks with custom ones, overriding ASG logic for launching new instances and replacing failing ones.
-
-## Alternate Solutions
-We are aware of a number of projects that seek to address the same problem, including SpotInst, Autospotting, Hollow Trees, and Pusher.
+In the meantime, please join our mailing list to receive project updates.
